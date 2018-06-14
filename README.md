@@ -34,7 +34,7 @@ res = await ko.request('/')
 console.log(res.statusCode, res.body) // 200 hello world
 
 res = await ko.request({ url: '/', method: 'POST', json: {} })
-console.log(res.statusCode, res.body) // 405 Not Implement
+console.log(res.statusCode, res.body) // 405 Method Not Allowed
 
 res = await ko.request('/not/exist')
 console.log(res.statusCode, res.body) // 404 Not Found
