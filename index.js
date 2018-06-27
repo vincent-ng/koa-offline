@@ -28,21 +28,30 @@ class FakeRequest extends IncomingMessage {
 	}
 }
 
+function freeze(object, property, value) {
+	Object.defineProperty(object, property, {
+		get: () => value,
+		set: () => {},
+	})
+}
+
 function bodyInjector(ctx, next) {
-	if (typeof ctx.req.body === 'object') {
-		ctx.request.body = ctx.req.body
+	const { body, query } = ctx.req
+	if (typeof body === 'object') {
+		freeze(ctx.req, 'body', body)
+		freeze(ctx.request, 'body', body)
 	}
 	if (typeof ctx.req.query === 'object') {
-		ctx.query = ctx.req.query
-		ctx.request.query = ctx.req.query
+		freeze(ctx, 'query', query)
+		freeze(ctx.req, 'query', query)
+		freeze(ctx.request, 'query', query)
 	}
 	return next()
 }
 
 class Wrapper {
-	// set app.callback() to server
 	constructor(app) {
-		app.use(bodyInjector)
+		app.middleware.unshift(bodyInjector)
 		this.server = app.callback()
 	}
 	request(opt) {

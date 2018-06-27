@@ -1,7 +1,8 @@
 module.exports = {
     "env": {
         "es6": true,
-        "node": true
+        "node": true,
+        "mocha": true,
     },
     "extends": "airbnb-base",
     "parserOptions": {
@@ -9,6 +10,7 @@ module.exports = {
     },
     "root": true,
     "rules": {
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
         "no-tabs": 0,
         "indent": [
             "error",

@@ -1,12 +1,75 @@
-/* eslint-disable no-undef */
 require('mocha')
 require('should')
 const Koa = require('koa')
 const Router = require('koa-router')
 const qs = require('koa-qs')
+const koaBody = require('koa-body')
 const KoaOffline = require('../index.js')
 
-describe('koa wrapper', () => {
+describe('koa wrapper middleware', () => {
+	let ko
+	before(() => {
+		const app = new Koa()
+		const router = new Router()
+
+		router.get('/query', async (ctx) => {
+			ctx.body = ctx.query.seed
+		})
+
+		router.get('/req/query', async (ctx) => {
+			ctx.body = ctx.req.query.seed
+		})
+
+		router.get('/request/query', async (ctx) => {
+			ctx.body = ctx.request.query.seed
+		})
+
+		router.get('/req/body', async (ctx) => {
+			ctx.body = ctx.req.body.seed
+		})
+
+		router.get('/request/body', async (ctx) => {
+			ctx.body = ctx.request.body.seed
+		})
+
+		const change = async (ctx, next) => {
+			ctx.query = Math.random()
+			ctx.req.query = Math.random()
+			ctx.request.query = Math.random()
+			ctx.req.body = Math.random()
+			ctx.request.body = Math.random()
+			await next()
+		}
+
+		app.use(change)
+		app.use(koaBody({ patchNode: true, patchKoa: true }))
+		qs(app)
+		app.use(change)
+		app.use(router.routes())
+		app.use(router.allowedMethods())
+		app.use(change)
+		ko = new KoaOffline(app)
+	})
+
+	async function requestAndAssert(url) {
+		const seed = Math.random()
+		const res = await ko.request({
+			url,
+			query: { seed },
+			body: { seed },
+		})
+		res.statusCode.should.equal(200)
+		res.body.should.equal(String(seed))
+	}
+
+	it('can freeze query', () => requestAndAssert('/query'))
+	it('can freeze req query', () => requestAndAssert('/req/query'))
+	it('can freeze request query', () => requestAndAssert('/request/query'))
+	it('can freeze req body', () => requestAndAssert('/req/body'))
+	it('can freeze request body', () => requestAndAssert('/request/body'))
+})
+
+describe('koa wrapper param', () => {
 	let ko
 	const okText = 'route is ok'
 	const multi1Text = 'handle by first handler.'
