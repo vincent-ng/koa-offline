@@ -23,6 +23,7 @@ class FakeRequest extends IncomingMessage {
 		}
 		this.url = option.url
 		this.method = option.method || 'GET'
+		this.headers = option.headers || {}
 		this.query = option.query || option.qs
 		this.body = option.form || option.body || undefined
 		if (typeof option.json === 'object') {
@@ -45,7 +46,6 @@ function bodyInjector(ctx, next) {
 		freeze(ctx.request, 'body', body)
 	}
 	if (typeof ctx.req.query === 'object') {
-		freeze(ctx, 'query', query)
 		freeze(ctx.req, 'query', query)
 		freeze(ctx.request, 'query', query)
 	}

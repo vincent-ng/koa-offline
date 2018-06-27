@@ -152,7 +152,6 @@ describe('koa wrapper param', () => {
 	})
 })
 
-
 describe('koa wrapper', () => {
 	let ko
 
@@ -221,4 +220,46 @@ describe('koa wrapper', () => {
 		const res = await ko.request({ url: '/form', method: 'POST', body: p })
 		doAssert(p, res)
 	})
+})
+
+describe('koa wrapper', () => {
+	let ko
+
+	before(() => {
+		const app = new Koa()
+		const router = new Router()
+
+		router.get('/header', async (ctx) => {
+			ctx.body = JSON.stringify(ctx.header)
+		})
+
+		router.get('/headers', async (ctx) => {
+			ctx.body = JSON.stringify(ctx.headers)
+		})
+
+		router.get('/request/header', async (ctx) => {
+			ctx.body = JSON.stringify(ctx.request.header)
+		})
+
+		router.get('/request/headers', async (ctx) => {
+			ctx.body = JSON.stringify(ctx.request.headers)
+		})
+
+		app.use(koaBody())
+		qs(app)
+		app.use(router.routes())
+		app.use(router.allowedMethods())
+		ko = new KoaOffline(app)
+	})
+
+	async function requestAndAssert(url) {
+		const headers = { 'api-key': Math.random() }
+		const res = await ko.request({ url, headers })
+		JSON.parse(res.body).should.has.properties(headers)
+	}
+
+	it('can get ctx.header', () => requestAndAssert('/header'))
+	it('can get ctx.headers', () => requestAndAssert('/headers'))
+	it('can get ctx.request.header', () => requestAndAssert('/request/header'))
+	it('can get ctx.request.headers', () => requestAndAssert('/request/headers'))
 })
