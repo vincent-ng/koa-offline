@@ -23,8 +23,11 @@ class FakeRequest extends IncomingMessage {
 		}
 		this.url = option.url
 		this.method = option.method || 'GET'
-		this.query = option.query
-		this.body = option.form || option.json || option.body || undefined
+		this.query = option.query || option.qs
+		this.body = option.form || option.body || undefined
+		if (typeof option.json === 'object') {
+			this.body = option.json
+		}
 	}
 }
 
