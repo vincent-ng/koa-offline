@@ -49,6 +49,8 @@ describe('koa wrapper middleware', () => {
 		app.use(router.allowedMethods())
 		app.use(change)
 		ko = new KoaOffline(app)
+		ko = new KoaOffline(app) // can wrap multitimes
+		ko = new KoaOffline(app) // can wrap multitimes
 	})
 
 	async function requestAndAssert(url) {

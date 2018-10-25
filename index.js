@@ -54,7 +54,9 @@ function bodyInjector(ctx, next) {
 
 class Wrapper {
 	constructor(app) {
-		app.middleware.unshift(bodyInjector)
+		if (app.middleware.indexOf(bodyInjector) === -1) {
+			app.middleware.unshift(bodyInjector)
+		}
 		this.server = app.callback()
 	}
 	request(opt) {
